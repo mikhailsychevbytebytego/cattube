@@ -6,10 +6,29 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:generate-catalog": "tsx scripts/generate-catalog.ts",
+    "db:embed-thumbnails": "tsx scripts/backfill-embeddings.ts",
+    "db:generate-extra": "tsx scripts/generate-extra-videos.ts",
+    "db:seed-admin": "tsx scripts/seed-admin.ts"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.5",
+    "@fal-ai/client": "^1.10.1",
+    "@huggingface/transformers": "^4.3.0",
+    "better-auth": "^1.7.5",
+    "drizzle-orm": "^0.45.3",
+    "hls.js": "^1.7.3",
     "next": "16.3.5",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
@@ -19,9 +38,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "onnxruntime-node@1.30.0": true
   }
 }
