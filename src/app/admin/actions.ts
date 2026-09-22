@@ -113,7 +113,7 @@ async function videoValues(formData: FormData, previousThumbnail?: string) {
     extraChips: lines(formData, "extraChips"),
     watchChips: watchChipLines.length ? watchChipLines : null,
   };
-  if (previousThumbnail === thumbnail) return values;
+  if (previousThumbnail === thumbnail || process.env.VERCEL) return values;
   const { embedThumbnail } = await import("@/lib/clip-embed");
   return { ...values, embedding: await embedThumbnail(thumbnail) };
 }

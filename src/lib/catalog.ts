@@ -41,18 +41,14 @@ const feedSelect = {
   verified: channels.verified,
 };
 
-export async function listFeedVideos(options: { category: string; q: string }) {
+export async function listFeedVideos(options: {
+  category: string;
+  q: string;
+  queryEmbedding?: number[] | null;
+}) {
   const query = options.q.trim();
   const categoryFilter = options.category !== ALL_CATEGORY;
-  let queryEmbedding: number[] | null = null;
-  if (query) {
-    try {
-      const { embedQuery } = await import("@/lib/clip-embed");
-      queryEmbedding = await embedQuery(query);
-    } catch (error) {
-      console.error("CLIP query embedding failed", error);
-    }
-  }
+  const queryEmbedding = options.queryEmbedding ?? null;
 
   const filters = [];
   if (categoryFilter) filters.push(eq(categories.name, options.category));

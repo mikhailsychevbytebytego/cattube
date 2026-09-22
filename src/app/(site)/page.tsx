@@ -11,7 +11,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       ? categoryParam
       : ALL_CATEGORY;
   const query = first(params.q) ?? "";
-  const videos = await listFeedVideos({ category: selected, q: query });
+  const videos = await listFeedVideos({
+    category: selected,
+    q: query,
+    queryEmbedding: await embedSearchQuery(query),
+  });
 
   return (
     <main className="min-h-full w-full px-4 pt-3 pb-12 sm:px-6 xl:pr-8">
@@ -26,4 +30,15 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
 function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+async function embedSearchQuery(query: string) {
+  if (!query.trim() || process.env.VERCEL) return null;
+  try {
+    const { embedQuery } = await import("@/lib/clip-embed");
+    return await embedQuery(query);
+  } catch (error) {
+    console.error("CLIP query embedding failed", error);
+    return null;
+  }
 }
