@@ -2,7 +2,6 @@ import "server-only";
 
 import { and, asc, cosineDistance, desc, eq, ilike, inArray, isNotNull, ne, or } from "drizzle-orm";
 
-import { embedQuery } from "@/lib/clip-embed";
 import { db } from "@/lib/db";
 import type { Video } from "@/lib/cattube";
 import type { WatchComment, WatchVideo } from "@/lib/watch-data";
@@ -48,6 +47,7 @@ export async function listFeedVideos(options: { category: string; q: string }) {
   let queryEmbedding: number[] | null = null;
   if (query) {
     try {
+      const { embedQuery } = await import("@/lib/clip-embed");
       queryEmbedding = await embedQuery(query);
     } catch (error) {
       console.error("CLIP query embedding failed", error);

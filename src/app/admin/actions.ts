@@ -8,7 +8,6 @@ import { adminPath } from "@/lib/admin-routes";
 
 import { db } from "@/lib/db";
 import { channelHasVideos, categoryHasVideos } from "@/lib/admin-catalog";
-import { embedThumbnail } from "@/lib/clip-embed";
 import {
   categories,
   channels,
@@ -115,6 +114,7 @@ async function videoValues(formData: FormData, previousThumbnail?: string) {
     watchChips: watchChipLines.length ? watchChipLines : null,
   };
   if (previousThumbnail === thumbnail) return values;
+  const { embedThumbnail } = await import("@/lib/clip-embed");
   return { ...values, embedding: await embedThumbnail(thumbnail) };
 }
 
