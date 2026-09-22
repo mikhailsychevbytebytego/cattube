@@ -2,7 +2,6 @@ import "server-only";
 
 import { and, asc, cosineDistance, desc, eq, ilike, inArray, isNotNull, ne, or } from "drizzle-orm";
 
-import { embedQuery } from "@/lib/clip-embed";
 import { db } from "@/lib/db";
 import type { Video } from "@/lib/cattube";
 import type { WatchComment, WatchVideo } from "@/lib/watch-data";
@@ -42,17 +41,14 @@ const feedSelect = {
   verified: channels.verified,
 };
 
-export async function listFeedVideos(options: { category: string; q: string }) {
+export async function listFeedVideos(options: {
+  category: string;
+  q: string;
+  queryEmbedding?: number[] | null;
+}) {
   const query = options.q.trim();
   const categoryFilter = options.category !== ALL_CATEGORY;
-  let queryEmbedding: number[] | null = null;
-  if (query) {
-    try {
-      queryEmbedding = await embedQuery(query);
-    } catch (error) {
-      console.error("CLIP query embedding failed", error);
-    }
-  }
+  const queryEmbedding = options.queryEmbedding ?? null;
 
   const filters = [];
   if (categoryFilter) filters.push(eq(categories.name, options.category));

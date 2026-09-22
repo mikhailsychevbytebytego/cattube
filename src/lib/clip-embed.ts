@@ -1,10 +1,17 @@
+import "server-only";
+
 import {
   AutoProcessor,
   AutoTokenizer,
   CLIPTextModelWithProjection,
   CLIPVisionModelWithProjection,
   RawImage,
+  env,
 } from "@huggingface/transformers";
+
+if (process.env.VERCEL) {
+  env.cacheDir = "/tmp/transformers-cache";
+}
 
 export const CLIP_DIMENSIONS = 512;
 const CLIP_MODEL = "Xenova/clip-vit-base-patch32";
