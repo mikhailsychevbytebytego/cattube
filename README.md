@@ -1,5 +1,7 @@
 # CatTube
 
+[![Watch the CatTube exercise](https://img.youtube.com/vi/E5Ef_Kne17U/maxresdefault.jpg)](https://www.youtube.com/watch?v=E5Ef_Kne17U)
+
 CatTube is a small, working version of YouTube, built by directing an agent instead of writing the code by hand. The point of the exercise is to get a real site on the internet quickly: a homepage, a watch page, a database, and a catalog of generated cat videos that look good enough to show someone.
 
 You do not need to be a software engineer. If you can use an IDE, a terminal, and follow a prompt, you can rebuild this. The finished code in this repository is the result. The steps below are how it was made, with the prompts cleaned up so you can paste them.
