@@ -75,7 +75,7 @@ Drag the image into the Cursor chat:
 Please implement the CatTube home page based on the provided image.
 ```
 
-Check the result at desktop width and at a phone width. The layout should respond. Then fix the framing:
+Check the result at desktop width and at a phone width. Test the layout and fix it if needed:
 
 ```text
 The site does not occupy the full viewport. Please fix it.
