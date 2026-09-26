@@ -72,16 +72,10 @@ GPT Image 2.5 is a good default. Nano Banana and Qwen Image are reasonable alter
 Drag the image into the Cursor chat:
 
 ```text
-Please implement the CatTube home page based on the provided image.
+Please implement the CatTube home page based on the provided image. It should fill the viewport, and it should work at desktop and phone widths.
 ```
 
-Check the result at desktop width and at a phone width. Test the layout and fix it if needed:
-
-```text
-The site does not occupy the full viewport. Please fix it.
-```
-
-The agent should build the page structure, make the category chips switch the grid, and cut avatars and thumbnails out of the mockup so the page is not one flat picture.
+Check the result at both widths. The agent should build the page structure, make the category chips switch the grid, and cut avatars and thumbnails out of the mockup so the page is not one flat picture.
 
 ## 4. Draw and implement the watch page
 
@@ -118,13 +112,7 @@ Put the real URL in `.env` only. Percent-encode reserved characters in the passw
 This step is large. Switch to plan mode:
 
 ```text
-Please convert all mock data on the website into real database objects and add a CRUD admin UI.
-```
-
-If the agent asks about authentication, answer:
-
-```text
-No authentication yet. We will add it later. Leave the admin UI open for now.
+Please convert all mock data on the website into real database objects and add a CRUD admin UI. No authentication yet. Leave the admin UI open for now. We will add it later.
 ```
 
 Read the plan. It should cover a real schema (videos, channels, comments, categories, and the relations between them), a migration of the static mock data, and an admin UI to list, create, edit, and delete those records. Then tell it to build the plan.
@@ -151,28 +139,18 @@ Let's regenerate the data by:
 - using GPT Image 2.5 to generate each thumbnail from that description
 - using H3 Max Turbo to generate each video from the description and the source thumbnail
 - using Cloudflare to host the image on the image CDN and the video on the video CDN
-```
 
-When the plan asks how big the first batch should be, and how the image and video models should be used, answer:
-
-```text
-Generate 12 videos. The image model creates the thumbnail from the text description only. The video model creates the video from that thumbnail plus the description.
+Generate 12 videos. The image model creates the thumbnail from the text description only. The video model creates the video from that thumbnail plus the description. The watch page should autoplay the video.
 ```
 
 Twelve matches the mock grid and keeps the first video bill small. After it finishes, open a video. The thumbnail and the clip should both be generated, and the player should be playing a real stream.
-
-Then:
-
-```text
-Make the videos autoplay.
-```
 
 ## 8. Related videos
 
 Title search is too brittle. "Cat" will miss "tiger". A CLIP embedding turns a thumbnail into a vector, pgvector stores that vector in the same Postgres database, and cosine similarity ranks the other videos. Similar pictures land next to each other, so a superhero cat comes back with other superhero cats.
 
 ```text
-Let's implement better related videos by calculating a CLIP embedding of each video thumbnail and storing it in the database, then looking up the closest videos while excluding the current one, using cosine similarity. Use pgvector, and backfill the videos we already have.
+Let's implement better related videos by calculating a CLIP embedding of each video thumbnail and storing it in the database, then looking up the closest videos while excluding the current one, using cosine similarity. Use pgvector, and backfill the videos we already have. Compute the embeddings ahead of time. This app will be deployed to Vercel Hobby, so do not load native onnxruntime into every page function.
 ```
 
 The rail is easier to judge with more variety. Generate a second batch on two axes, subject and visual style:
@@ -188,7 +166,7 @@ Open a noir video, a sports video, and a fashion video. The top of the rail shou
 Related videos compare a thumbnail with other thumbnails, and those embeddings can be computed ahead of time. Search compares a typed query with thumbnails, so the query has to be embedded on the request.
 
 ```text
-Now implement search by creating an embedding of the user's query and using it to fetch the most relevant videos.
+Now implement search by creating an embedding of the user's query and using it to fetch the most relevant videos. On Vercel, if a request-time embedding does not fit the function, fall back to matching titles and channel names. Related videos keep using the embeddings already stored in Postgres.
 ```
 
 Try `noir`, `superhero`, and `sports`. Results should follow the pictures, not only the words in the title.
@@ -196,16 +174,10 @@ Try `noir`, `superhero`, and `sports`. Results should follow the pictures, not o
 ## 10. Accounts, subscriptions, and dark mode
 
 ```text
-Let's implement simple email and password authentication with Better Auth, an admin flag, and a test account that already has the flag set. Add the ability to subscribe to channels, and a subscriptions feed I can watch.
+Let's implement simple email and password authentication with Better Auth, an admin flag, and a test account that already has the flag set. Add the ability to subscribe to channels, and a subscriptions feed I can watch. The subscribe button must follow the video currently on screen, including after opening a related video.
 ```
 
-Sign in with the test account the agent creates. In this repository that account is `admin@cattube.test` / `AdminCats123!`. `/admin` should require it. Subscribe on a watch page, then open the subscriptions feed and confirm those channels are there.
-
-If the button does nothing after you move to another video, the action was still bound to the previous one:
-
-```text
-Please make the Subscribe button on the watch page functional.
-```
+Sign in with the test account the agent creates. In this repository that account is `admin@cattube.test` / `AdminCats123!`. `/admin` should require it. Subscribe on a watch page, open a related video and subscribe again, then open the subscriptions feed and confirm those channels are there.
 
 Then the polish:
 
@@ -223,29 +195,9 @@ Create an empty GitHub repository. The folder may never have been initialized ag
 Put this project inside https://github.com/<you>/<repo> now.
 ```
 
-Do not commit `.env`. Connect the GitHub repo in Vercel, choose the Next.js preset, and import the environment variables from your local `.env`.
+Do not commit `.env`. Connect the GitHub repo in Vercel, choose the Next.js preset, and import the environment variables from your local `.env`. Deploy, then open the site and play a video.
 
-The first production deploy will fail. CLIP's Node build expects `onnxruntime-node`, and Vercel's serverless bundle does not include it. Copy the error from the Vercel logs:
-
-```text
-My Vercel deployment is failing with:
-
-Error: Failed to load external module @huggingface/transformers: Error: Cannot find module 'onnxruntime-node'
-
-Please fix it and create a GitHub pull request.
-```
-
-Review the pull request, open the Vercel preview, and merge once the site loads.
-
-If the next deploy says this:
-
-```text
-No more than 12 Serverless Functions can be added to a Deployment on the Hobby plan.
-```
-
-you do not need a Pro plan. Hobby allows 12 bundled functions, and Next.js normally packs these pages into a handful of them. The failure comes from copying the native ONNX package into every route, which makes each page too large to share a bundle. Tell the agent that, and keep CLIP out of the Vercel page functions. Related videos still use the embeddings already stored in Postgres. On Vercel, search falls back to matching titles and channel names. Generating embeddings at request time does not fit a short Hobby function anyway.
-
-After that deploy succeeds, the site is a public CatTube: generated videos, search, related videos, accounts, subscriptions, and dark mode.
+The site is a public CatTube: generated videos, search, related videos, accounts, subscriptions, and dark mode.
 
 ## Run this repository
 
